@@ -1,14 +1,17 @@
 # 🔮 Grimoire
 
-> A language-agnostic task runner where commands become sigils and automation becomes magic.
+> A language-agnostic task runner where commands become sigils and automation
+> becomes magic.
 
-Inspired by the spellbooks of **Frieren** and **Witch Hat Atelier**, Grimoire is a cross-platform automation tool for defining, documenting, and executing reusable workflows.
+Inspired by the spellbooks of **Frieren** and **Witch Hat Atelier**, Grimoire is
+a cross-platform automation tool for defining, documenting, and executing
+reusable workflows.
 
 ## Features (Being Implemented)
 
 * 📖 Declarative `Grimoire.toml` configuration
 * 🪄 Tasks called **Sigils**
-* 🌍 Multi-language support 
+* 🌍 Multi-language support
   * Shell
   * Python
   * JavaScript / TypeScript
@@ -24,9 +27,10 @@ Inspired by the spellbooks of **Frieren** and **Witch Hat Atelier**, Grimoire is
 
 ---
 
-# Installation
+## Installation
 
-> Installation instructions will be available once the first release is published.
+> Installation instructions will be available once the first release is
+> published.
 
 ```bash
 cargo install --git https://github.com/Vaishnav-Sabari-Girish/grimoire
@@ -34,7 +38,7 @@ cargo install --git https://github.com/Vaishnav-Sabari-Girish/grimoire
 
 ---
 
-# Quick Start
+## Quick Start
 
 Initialize a new project:
 
@@ -61,7 +65,9 @@ depends = ["build", "test"]
 run = "cargo dist build"
 ```
 
-`grimoire` uses different terminologies for commands, run etc. You can refer #concepts for the proper terminologies.
+`grimoire` uses different terminologies for commands, run etc. You can refer
+
+## concepts for the proper terminologies
 
 Run a sigil:
 
@@ -83,7 +89,7 @@ grimoire inspect release
 
 ---
 
-# Multi-Language Sigils
+## Multi-Language Sigils
 
 Python:
 
@@ -117,7 +123,7 @@ echo "Hello from Grimoire!"
 
 ---
 
-# Concepts
+## Concepts
 
 | Term        | Meaning                  |
 | ----------- | ------------------------ |
@@ -130,7 +136,7 @@ echo "Hello from Grimoire!"
 
 ---
 
-# Example
+## Example
 
 ```bash
 grimoire cast build
@@ -147,7 +153,7 @@ grim flash
 
 ---
 
-# Philosophy
+## Philosophy
 
 Grimoire aims to make automation:
 
@@ -157,11 +163,12 @@ Grimoire aims to make automation:
 * Language-agnostic
 * Pleasant to use
 
-Underneath the magical terminology is a serious, production-grade automation tool.
+Underneath the magical terminology is a serious, production-grade automation
+tool.
 
 ---
 
-# Roadmap
+## Roadmap
 
 * [ ] Core task runner
 * [ ] Dependency engine
@@ -175,22 +182,22 @@ Underneath the magical terminology is a serious, production-grade automation too
 
 ---
 
-# Inspiration
+## Inspiration
 
-## Tooling
+### Tooling
 
 * `just`
 * `make`
 * `task`
 * `cargo xtask`
 
-## Theme 
+### Theme
 
 * **Frieren: Beyond Journey's End**
 * **Witch Hat Atelier**
 
 ---
 
-## License
+### License
 
 MIT OR Apache-2.0
