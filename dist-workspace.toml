@@ -14,11 +14,6 @@ targets = [
     "x86_64-pc-windows-msvc",
 ]
 
-# Tell the native cargo-dist builder to append `--features ratty`
-features = ["ratty", "ble"]
 
 [dist.dependencies.apt]
-pkg-config = "*"
 libfontconfig1-dev = "*"
-libudev-dev = "*"
-libdbus-1-dev = "*"  # <--- Add this line
