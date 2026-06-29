@@ -68,7 +68,7 @@ depends = ["build", "test"]
 run = "cargo dist build"
 ```
 
-`grimoire` uses different terminologies for commands, run etc. You can refer
+`grimoire` uses different terminologies for commands, run etc. You can refer to
 [concepts](#concepts) for the proper terminologies
 
 Run a sigil:

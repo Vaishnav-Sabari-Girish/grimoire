@@ -5,7 +5,7 @@ description = "A Simple Welcome spell"
 language = "shell"
 run = "echo 'Welcome to Grimoire!'"
 
-# Testing default lnaguage fallback
+# Testing default language fallback
 [sigil.bye]
 description = "Bye Spell"
 run = "echo 'Bye From Grimoire'"
