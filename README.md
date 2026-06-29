@@ -10,34 +10,31 @@ reusable workflows.
 I am using `grimoire` in this project too. Take a look at
 [Grimoire.toml](./Grimoire.toml)
 
-## Features (Being Implemented)
+## Features
 
 * 📖 Declarative `Grimoire.toml` configuration
 * 🪄 Tasks called **Sigils**
-* 🌍 Multi-language support
-  * Shell
-  * Python
-  * JavaScript / TypeScript
-  * Lua
-  * PowerShell
-  * and more
-* 🔗 Dependency management
+* 🌍 Multi-language support (Shell, Python, Node, Bash, C, C++)
+* 🔗 Dependency management (DAG with cycle detection)
+* 🎛 **Interactive prompts and arguments via Terminal UI**
 * 📝 Self-documenting workflows
-* 🎛 Interactive prompts and arguments
-* 🌲 Dependency graph visualization
-* 🔌 Extensible plugin system (**Familiars**)
 * 💻 Cross-platform (Linux, macOS, Windows)
 
 ---
 
 ## Installation
 
-> Installation instructions will be available once the first release is
-> published.
+**Via Cargo:**
+
+I have not published it to [crates.io](https://crates.io/) yet.
 
 ```bash
 cargo install --git https://github.com/Vaishnav-Sabari-Girish/grimoire
+
 ```
+
+*(Note: Installing via cargo will provide both the `grimoire` and `grim`
+executables).*
 
 ---
 
@@ -46,7 +43,8 @@ cargo install --git https://github.com/Vaishnav-Sabari-Girish/grimoire
 Initialize a new project:
 
 ```bash
-grimoire init
+grim init
+
 ```
 
 Create a `Grimoire.toml`:
@@ -54,104 +52,136 @@ Create a `Grimoire.toml`:
 ```toml
 version = "1"
 
-[sigil.build]
-description = "Compile the project"
-run = "cargo build"
+[sigil.hello]
+description = "A Simple Welcome spell"
+language = "shell"
+run = "echo 'Welcome to Grimoire!'"
 
-[sigil.test]
-description = "Run tests"
-run = "cargo test"
+# Testing default language fallback
+[sigil.bye]
+description = "Bye Spell"
+run = "echo 'Bye From Grimoire'"
 
-[sigil.release]
-description = "Build release artifacts"
-depends = ["build", "test"]
-run = "cargo dist build"
 ```
-
-`grimoire` uses different terminologies for commands, run etc. You can refer to
-[concepts](#concepts) for the proper terminologies
 
 Run a sigil:
 
 ```bash
-grimoire cast build
+grim cast hello
+
 ```
 
 List available sigils:
 
 ```bash
-grimoire sigils
+grim sigils
+
 ```
 
-Inspect a sigil:
+---
 
-```bash
-grimoire inspect release
+## Interactive Ingredients (Arguments)
+
+Grimoire can pause execution and prompt the user for input using beautiful
+terminal menus. Use the `{{variable}}` syntax to inject choices into your run
+strings.
+
+```toml
+# Testing Options
+[sigil.options]
+description = "Try out option selection"
+run = "echo 'Selection option is {{opt}}'"
+
+[sigil.options.args.opt]
+type = "select"
+choices = [
+  "Option 1",
+  "Option 2",
+  "Option 3"
+]
+default = "Option 1"
+
 ```
+
+When you run `grim cast options`, Grimoire will open an interactive TUI menu for
+you to select the desired option before executing the spell!
 
 ---
 
 ## Multi-Language Sigils
 
-Python:
+Grimoire does not assume everything is a shell script. Every sigil can specify
+its own runtime. *(Note: The host machine must have the respective interpreter
+or compiler installed).*
+
+### Interpreted Languages
+
+Python and JavaScript execute directly via their respective binaries:
 
 ```toml
-[sigil.hello]
+[sigil.hello_py]
 language = "python"
-run = """
-print("Hello from Grimoire!")
-"""
-```
+description = "Hello in Python"
+run = "print('Hello World')"
 
-JavaScript:
-
-```toml
-[sigil.hello]
+[sigil.hello_js]
 language = "javascript"
+description = "Hello in javascript"
 run = """
-console.log("Hello from Grimoire!");
+console.log("Hello World");
 """
+
 ```
 
-Shell:
+### Compiled Languages (C / C++)
+
+For C and C++, Grimoire acts as a seamless wrapper. It automatically scribes
+your code to a temporary file, compiles it (via `gcc` or `g++`), executes the
+resulting binary, and cleans up the temporary files—all in a fraction of a
+second.
+
+**Important:** Always use TOML literal strings (three single quotes `'''`) for
+C/C++ to prevent TOML from escaping newline characters (`\n`).
 
 ```toml
-[sigil.hello]
-language = "shell"
-run = """
-echo "Hello from Grimoire!"
-"""
+[sigil.hello_c]
+language = "c"
+description = "Hello in C"
+run = '''
+#include <stdio.h>
+
+int main() {
+  printf("Hello from C\n");
+  return 0;
+}
+'''
+
+[sigil.hello_cpp]
+language = "cpp"
+description = "Hello in C++"
+run = '''
+#include <iostream>
+
+int main() {
+    std::cout << "Hello from C++!" << std::endl;
+    return 0;
+}
+'''
+
 ```
 
 ---
 
 ## Concepts
 
-| Term        | Meaning                  |
-| ----------- | ------------------------ |
-| Grimoire    | Project configuration    |
-| Sigil       | A task or command        |
-| Cast        | Execute a sigil          |
+| Term | Meaning |
+| --- | --- |
+| Grimoire | Project configuration |
+| Sigil | A task or command |
+| Cast | Execute a sigil |
 | Ingredients | Parameters and variables |
-| Familiars   | Plugins and extensions   |
-| Codex       | Generated documentation  |
-
----
-
-## Example
-
-```bash
-grimoire cast build
-grimoire cast flash
-grimoire cast release
-```
-
-Or using the short alias:
-
-```bash
-grim build
-grim flash
-```
+| Familiars | Plugins and extensions |
+| Codex | Generated documentation |
 
 ---
 
@@ -172,12 +202,12 @@ tool.
 
 ## Roadmap
 
-* [ ] Core task runner
-* [ ] Dependency engine
-* [ ] Multi-language runtimes
-* [ ] Interactive prompts
+* [x] Core task runner
+* [x] Dependency engine (DAG)
+* [x] Multi-language runtimes
+* [x] Interactive prompts
 * [ ] Documentation generation
-* [ ] TUI interface
+* [ ] Full TUI interface (`grim tui`)
 * [ ] Graph visualization
 * [ ] Plugin system
 * [ ] Project templates

@@ -127,6 +127,54 @@ fn execute_inner<'a>(
                 c.arg("-c").arg(&final_run_cmd);
                 c
             }
+            "c" => {
+                let src = ".grimoire_tmp.c";
+                let exe = if cfg!(target_os = "windows") {
+                    ".grimoire_tmp.exe"
+                } else {
+                    ".grimoire_tmp"
+                };
+
+                // 1. Scribe the code to a temporary file
+                std::fs::write(src, &final_run_cmd).expect("Failed to scribe temporary C file");
+
+                // 2. Chain the compile, execute, and cleanup commands
+                if cfg!(target_os = "windows") {
+                    let mut c = Command::new("cmd");
+                    let run_str = format!("gcc {src} -o {exe} && {exe} & del {src} {exe}");
+                    c.args(["/C", &run_str]);
+                    c
+                } else {
+                    let mut c = Command::new("sh");
+                    let run_str = format!("gcc {src} -o {exe} && ./{exe}; rm -f {src} {exe}");
+                    c.arg("-c").arg(&run_str);
+                    c
+                }
+            }
+            "cpp" | "c++" => {
+                let src = ".grimoire_tmp.cpp";
+                let exe = if cfg!(target_os = "windows") {
+                    ".grimoire_tmp.exe"
+                } else {
+                    ".grimoire_tmp"
+                };
+
+                // 1. Scribe the code to a temporary file
+                std::fs::write(src, &final_run_cmd).expect("Failed to scribe temporary C++ file");
+
+                // 2. Chain the compile, execute, and cleanup commands (using g++)
+                if cfg!(target_os = "windows") {
+                    let mut c = Command::new("cmd");
+                    let run_str = format!("g++ {src} -o {exe} && {exe} & del {src} {exe}");
+                    c.args(["/C", &run_str]);
+                    c
+                } else {
+                    let mut c = Command::new("sh");
+                    let run_str = format!("g++ {src} -o {exe} && ./{exe}; rm -f {src} {exe}");
+                    c.arg("-c").arg(&run_str);
+                    c
+                }
+            }
             "javascript" | "node" => {
                 let mut c = Command::new("node");
                 c.arg("-e").arg(&final_run_cmd);

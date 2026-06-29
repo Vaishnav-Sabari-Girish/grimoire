@@ -9,3 +9,42 @@ run = "echo 'Welcome to Grimoire!'"
 [sigil.bye]
 description = "Bye Spell"
 run = "echo 'Bye From Grimoire'"
+
+# Testing Options
+[sigil.options]
+description = "Try out option selection"
+run = "echo 'Selection option is {{opt}}'"
+
+[sigil.options.args.opt]
+type = "select"
+choices = [
+  "Option 1",
+  "Option 2",
+  "Option 3"
+]
+default = "Option 1"
+
+# Languages
+[sigil.hello_py]
+language = "python"
+description = "Hello in Python"
+run = "print('Hello World')"
+
+[sigil.hello_js]
+language = "javascript"
+description = "Hello in javascript"
+run = """
+console.log("Hello World");
+"""
+
+[sigil.hello_c]
+language = "c"
+description = "Hello in C"
+run = '''
+#include <stdio.h>
+
+int main() {
+  printf("Hello World\n");
+  return 0;
+}
+'''
