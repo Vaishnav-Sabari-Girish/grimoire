@@ -12,19 +12,18 @@ struct GrimoireConfig {
     sigils: HashMap<String, Sigil>,
 }
 
-// The individual spell definitions 
+// The individual spell definitions
 #[derive(Debug, Deserialize)]
 struct Sigil {
     description: Option<String>,
     language: Option<String>,
     run: String,
     #[serde(default)]
-    depends: Vec<String>
+    depends: Vec<String>,
 }
 
 fn main() -> Result<()> {
-
-    //1. Look for the file 
+    //1. Look for the file
     let config_content = fs::read_to_string("Grimoire.toml")
         .context("Failed to find or read Grimoire.toml in the current directory")?;
 
@@ -32,7 +31,7 @@ fn main() -> Result<()> {
     let config: GrimoireConfig = toml::from_str(&config_content)
         .context("Failed to parse the Grimoire File. Is the syntax correct ?")?;
 
-    println!("Successfuly opened Grimoire v{}", config.version);
+    println!("Successfully opened Grimoire v{}", config.version);
     println!("Found {} sigils: \n", config.sigils.len());
 
     for (name, sigil) in &config.sigils {
@@ -42,7 +41,10 @@ fn main() -> Result<()> {
             println!("      Description: {}", desc);
         }
 
-        println!("      Language: {}", sigil.language.as_deref().unwrap_or("shell (default)"));
+        println!(
+            "      Language: {}",
+            sigil.language.as_deref().unwrap_or("shell (default)")
+        );
         println!("      Run: {}", sigil.run);
         if !sigil.depends.is_empty() {
             println!("      Depends on: {:?}", sigil.depends);
