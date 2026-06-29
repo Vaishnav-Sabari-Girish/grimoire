@@ -8,6 +8,10 @@ run = "cargo build"
 description = "Run tests"
 run = "cargo test"
 
+[sigil.test_lang]
+language = "python"
+run = "print('Hello World')"
+
 [sigil.release]
 description = "Create release artifacts"
 language = "bash"
