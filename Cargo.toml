@@ -10,6 +10,7 @@ homepage = "https://github.com/Vaishnav-Sabari-Girish/grimoire"
 repository = "https://github.com/Vaishnav-Sabari-Girish/grimoire"
 keywords = ["cli", "tui", "task"]
 categories = ["command-line-utilities"]
+autobins = false
 
 [dependencies]
 anyhow = "1.0.103"
@@ -18,3 +19,11 @@ inquire = "0.9.4"
 serde = { version = "1.0.228", features = ["derive"] }
 tokio = { version = "1.52.3", features = ["full"] }
 toml = "1.1.2"
+
+[[bin]]
+name = "grimoire"
+path = "src/main.rs"
+
+[[bin]]
+name = "grim"
+path = "src/main.rs"

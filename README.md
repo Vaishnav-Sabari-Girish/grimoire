@@ -69,8 +69,7 @@ run = "cargo dist build"
 ```
 
 `grimoire` uses different terminologies for commands, run etc. You can refer
-
-## concepts for the proper terminologies
+[concepts](#concepts) for the proper terminologies
 
 Run a sigil:
 

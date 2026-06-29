@@ -1,10 +1,33 @@
 use anyhow::{Context, Result, bail};
 use inquire::Select;
-use std::collections::HashMap;
+use std::fs;
 use std::pin::Pin;
+use std::{collections::HashMap, path::Path};
 use tokio::process::Command;
 
 use crate::config::{ArgDef, GrimoireConfig};
+
+pub fn init_grimoire() -> Result<()> {
+    let path = Path::new("Grimoire.toml");
+
+    if path.exists() {
+        bail!("A Grimoire.toml already exists");
+    }
+
+    let template = r#"version = "1"
+
+[sigil.hello]
+description = "A Simple Welcome spell"
+language = "shell"
+run = "echo 'Welcome to Grimoire!'"
+    "#;
+
+    fs::write(path, template).context("Failed to write the new Grimoire.toml file")?;
+
+    println!("Grimoire.toml created. Try running it with 'grim cast hello'");
+
+    Ok(())
+}
 
 pub fn list_sigils(config: &GrimoireConfig) {
     println!("Available Sigils in Grimoire v{}:\n", config.version);
