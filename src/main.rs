@@ -16,7 +16,7 @@ async fn main() -> Result<()> {
             executor::list_sigils(&config);
         }
         Commands::Cast { name } => {
-            executor::call_sigil(&config, &name).await?;
+            executor::cast_sigil(&config, &name).await?;
         }
     }
 
