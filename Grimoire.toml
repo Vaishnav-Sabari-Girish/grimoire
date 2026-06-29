@@ -1,0 +1,15 @@
+version = "1"
+
+[sigil.build]
+description = "Compile project"
+run = "cargo build"
+
+[sigil.test]
+description = "Run tests"
+run = "cargo test"
+
+[sigil.release]
+description = "Create release artifacts"
+language = "bash"
+depends = ["build", "test"]
+run = "cargo dist build"

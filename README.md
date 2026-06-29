@@ -7,6 +7,8 @@ Inspired by the spellbooks of **Frieren** and **Witch Hat Atelier**, Grimoire is
 a cross-platform automation tool for defining, documenting, and executing
 reusable workflows.
 
+I am using `grimoire` in this project too. Take a look at [Grimoire.toml](./Grimoire.toml)
+
 ## Features (Being Implemented)
 
 * 📖 Declarative `Grimoire.toml` configuration
