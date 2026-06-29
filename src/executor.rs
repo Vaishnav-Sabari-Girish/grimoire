@@ -109,6 +109,11 @@ fn execute_inner<'a>(
                 c.arg("-e").arg(&final_run_cmd);
                 c
             }
+            "lua" => {
+                let mut c = Command::new("lua");
+                c.arg("-e").arg(&final_run_cmd);
+                c
+            }
             "bash" => {
                 let mut c = Command::new("bash");
                 c.arg("-c").arg(&final_run_cmd);
