@@ -14,6 +14,7 @@ pub struct Cli {
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
+    Init,
     Cast { name: String },
     Sigils,
 }
