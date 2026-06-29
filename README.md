@@ -24,9 +24,13 @@ I am using `grimoire` in this project too. Take a look at
 
 ## Installation
 
-**Via Cargo:**
+### Via Cargo
 
-I have not published it to [crates.io](https://crates.io/) yet.
+```bash
+cargo install grim
+```
+
+For the latest development version
 
 ```bash
 cargo install --git https://github.com/Vaishnav-Sabari-Girish/grimoire
