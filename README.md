@@ -233,3 +233,19 @@ tool.
 ### License
 
 MIT OR Apache-2.0
+
+---
+
+## 🧠 (mostly) Brain made
+
+**This project was NOT vibe-coded BUT AI is still involved in some parts of
+it.**
+
+* **Generating test code:** Because it's something I always skip so I would
+rather have some AI generated tests than none at all.
+* **Micro-improvements:** I have used AI as an advisor to improve some bits of
+code here and there. Big refactors or new features are done by my hand though.
+
+<br>
+
+![img](https://brainmade.org/white-logo.svg)
