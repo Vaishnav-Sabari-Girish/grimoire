@@ -7,7 +7,7 @@ use tokio::process::Command;
 use crate::config::{ArgDef, GrimoireConfig};
 
 pub fn list_sigils(config: &GrimoireConfig) {
-    println!("  Available Sigils in Grimoire v{}:\n", config.version);
+    println!("Available Sigils in Grimoire v{}:\n", config.version);
     for (name, sigil) in &config.sigils {
         let desc = sigil.description.as_deref().unwrap_or("No description");
         println!("    {name:<15} - {desc}");
@@ -40,12 +40,12 @@ fn execute_inner<'a>(
         let mut current_path = path.clone();
         current_path.push(name.to_string());
 
-        // 2. Resolve Dependencies (The Fix for Issue 1)
+        // 2. Resolve Dependencies
         for dep in &sigil.depends {
             execute_inner(config, dep, current_path.clone()).await?;
         }
 
-        // 3. Resolve Arguments (The Fix for Issue 2)
+        // 3. Resolve Arguments
         let mut resolved_args = HashMap::new();
 
         for (arg_name, arg_def) in &sigil.args {
@@ -93,21 +93,54 @@ fn execute_inner<'a>(
             final_run_cmd = final_run_cmd.replace(&template_key, &val);
         }
 
-        println!("> Executing: {}", final_run_cmd);
+        println!("> Executing [{}]: {}", name, final_run_cmd);
 
-        // 5. Fully Asynchronous Execution
-        let mut child = if cfg!(target_os = "windows") {
-            Command::new("cmd")
-                .args(["/C", &final_run_cmd])
-                .spawn()
-                .context("Failed to spawn Windows command prompt")?
-        } else {
-            Command::new("sh")
-                .arg("-c")
-                .arg(&final_run_cmd)
-                .spawn()
-                .context("Failed to spawn shell")?
+        // 5. Fully Asynchronous Execution with Language Routing
+        let lang = sigil.language.as_deref().unwrap_or("shell");
+
+        let mut cmd = match lang {
+            "python" | "python3" => {
+                let mut c = Command::new("python3");
+                c.arg("-c").arg(&final_run_cmd);
+                c
+            }
+            "javascript" | "node" => {
+                let mut c = Command::new("node");
+                c.arg("-e").arg(&final_run_cmd);
+                c
+            }
+            "bash" => {
+                let mut c = Command::new("bash");
+                c.arg("-c").arg(&final_run_cmd);
+                c
+            }
+            "zsh" => {
+                let mut c = Command::new("zsh");
+                c.arg("-c").arg(&final_run_cmd);
+                c
+            }
+            "powershell" | "pwsh" => {
+                let mut c = Command::new("pwsh");
+                c.arg("-Command").arg(&final_run_cmd);
+                c
+            }
+            // Fallback for "shell", "sh", or unrecognized languages
+            _ => {
+                if cfg!(target_os = "windows") {
+                    let mut c = Command::new("cmd");
+                    c.args(["/C", &final_run_cmd]);
+                    c
+                } else {
+                    let mut c = Command::new("sh");
+                    c.arg("-c").arg(&final_run_cmd);
+                    c
+                }
+            }
         };
+
+        let mut child = cmd
+            .spawn()
+            .with_context(|| format!("Failed to spawn interpreter for language '{}'", lang))?;
 
         let status = child.wait().await?;
 
