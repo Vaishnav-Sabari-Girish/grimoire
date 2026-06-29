@@ -1,9 +1,9 @@
 use anyhow::{Ok, Result};
 use clap::Parser;
 
-use grimoire::cli::{Cli, Commands};
-use grimoire::config;
-use grimoire::executor;
+use grim::cli::{Cli, Commands};
+use grim::config;
+use grim::executor;
 
 #[tokio::main]
 async fn main() -> Result<()> {
