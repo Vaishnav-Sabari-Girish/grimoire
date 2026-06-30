@@ -116,6 +116,12 @@ fn execute_inner<'a>(
 
         // 4. Inject resolved arguments into the run string
         let mut final_run_cmd = sigil.run.clone();
+
+        for (key, val) in &config.ingredients {
+            let template_key = format!("{{{{{}}}}}", key);
+            final_run_cmd = final_run_cmd.replace(&template_key, val);
+        }
+
         for (key, val) in resolved_args {
             let template_key = format!("{{{{{}}}}}", key);
             final_run_cmd = final_run_cmd.replace(&template_key, &val);
