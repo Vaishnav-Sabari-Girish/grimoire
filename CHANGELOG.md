@@ -1,5 +1,50 @@
 
-## 0.1.0 - 2026-06-29
+## v0.2.0 - 2026-06-30
+
+
+
+
+
+
+
+### :rocket: New features
+
+- **(flag)** `grimoire` now supports CLI flags
+
+
+
+
+
+
+### :bug: Bug fixes
+
+- **(exe)** Remove executable file too
+
+- **(injection)** Prevent shell injection in C/C++ sigils by splitting compile and run
+
+- **(executor)** Preserve C/C++ exit codes by shifting cleanup to Rust
+
+- **(executor)** Correct cross-language CLI arguments and refactor binary structure
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## v0.1.0 - 2026-06-29
 
 
 
