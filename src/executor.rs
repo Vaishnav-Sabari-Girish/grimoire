@@ -38,9 +38,13 @@ pub fn list_sigils(config: &GrimoireConfig) {
 }
 
 /// Public entry point for casting a sigil
-pub async fn cast_sigil(config: &GrimoireConfig, name: &str) -> Result<()> {
+pub async fn cast_sigil(
+    config: &GrimoireConfig,
+    name: &str,
+    extra_args: Vec<String>,
+) -> Result<()> {
     // We pass an empty path vector to start cycle tracking
-    execute_inner(config, name, Vec::new()).await
+    execute_inner(config, name, Vec::new(), extra_args).await
 }
 
 /// Internal asynchronous recursive executor
@@ -48,6 +52,7 @@ fn execute_inner<'a>(
     config: &'a GrimoireConfig,
     name: &'a str,
     path: Vec<String>,
+    extra_args: Vec<String>,
 ) -> Pin<Box<dyn std::future::Future<Output = Result<()>> + 'a>> {
     Box::pin(async move {
         // 1. Cycle Detection
@@ -65,7 +70,7 @@ fn execute_inner<'a>(
 
         // 2. Resolve Dependencies
         for dep in &sigil.depends {
-            execute_inner(config, dep, current_path.clone()).await?;
+            execute_inner(config, dep, current_path.clone(), Vec::new()).await?;
         }
 
         // 3. Resolve Arguments
@@ -114,6 +119,11 @@ fn execute_inner<'a>(
         for (key, val) in resolved_args {
             let template_key = format!("{{{{{}}}}}", key);
             final_run_cmd = final_run_cmd.replace(&template_key, &val);
+        }
+
+        if !extra_args.is_empty() {
+            let trailing = extra_args.join(" ");
+            final_run_cmd = format!("{} {}", final_run_cmd, trailing);
         }
 
         println!("> Executing [{}]: {}", name, final_run_cmd);
