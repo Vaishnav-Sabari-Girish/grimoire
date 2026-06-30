@@ -121,20 +121,25 @@ fn execute_inner<'a>(
             final_run_cmd = final_run_cmd.replace(&template_key, &val);
         }
 
-        if !extra_args.is_empty() {
-            let trailing = extra_args.join(" ");
-            final_run_cmd = format!("{} {}", final_run_cmd, trailing);
-        }
+        // Notice: We completely removed the `extra_args.join(" ")` logic from here.
 
         println!("> Executing [{}]: {}", name, final_run_cmd);
 
         // 5. Fully Asynchronous Execution with Language Routing
         let lang = sigil.language.as_deref().unwrap_or("shell");
+        let trailing = extra_args.join(" ");
 
         let mut cmd = match lang {
             "python" | "python3" => {
                 let mut c = Command::new("python3");
-                c.arg("-c").arg(&final_run_cmd);
+                // Pass extra_args as standard process arguments
+                c.arg("-c").arg(&final_run_cmd).args(&extra_args);
+                c
+            }
+            "javascript" | "node" => {
+                let mut c = Command::new("node");
+                // Pass extra_args as standard process arguments
+                c.arg("-e").arg(&final_run_cmd).args(&extra_args);
                 c
             }
             "c" => {
@@ -145,18 +150,20 @@ fn execute_inner<'a>(
                     ".grimoire_tmp"
                 };
 
-                // 1. Scribe the code to a temporary file
                 std::fs::write(src, &final_run_cmd).expect("Failed to scribe temporary C file");
 
-                // 2. Chain the compile, execute, and cleanup commands
                 if cfg!(target_os = "windows") {
                     let mut c = Command::new("cmd");
-                    let run_str = format!("gcc {src} -o {exe} && {exe} & del {src} {exe}");
+                    // Inject trailing args into the execution of the binary
+                    let run_str =
+                        format!("gcc {src} -o {exe} && {exe} {trailing} & del {src} {exe}");
                     c.args(["/C", &run_str]);
                     c
                 } else {
                     let mut c = Command::new("sh");
-                    let run_str = format!("gcc {src} -o {exe} && ./{exe}; rm -f {src} {exe}");
+                    // Inject trailing args into the execution of the binary
+                    let run_str =
+                        format!("gcc {src} -o {exe} && ./{exe} {trailing}; rm -f {src} {exe}");
                     c.arg("-c").arg(&run_str);
                     c
                 }
@@ -169,56 +176,66 @@ fn execute_inner<'a>(
                     ".grimoire_tmp"
                 };
 
-                // 1. Scribe the code to a temporary file
                 std::fs::write(src, &final_run_cmd).expect("Failed to scribe temporary C++ file");
 
-                // 2. Chain the compile, execute, and cleanup commands (using g++)
                 if cfg!(target_os = "windows") {
                     let mut c = Command::new("cmd");
-                    let run_str = format!("g++ {src} -o {exe} && {exe} & del {src} {exe}");
+                    let run_str =
+                        format!("g++ {src} -o {exe} && {exe} {trailing} & del {src} {exe}");
                     c.args(["/C", &run_str]);
                     c
                 } else {
                     let mut c = Command::new("sh");
-                    let run_str = format!("g++ {src} -o {exe} && ./{exe}; rm -f {src} {exe}");
+                    let run_str =
+                        format!("g++ {src} -o {exe} && ./{exe} {trailing}; rm -f {src} {exe}");
                     c.arg("-c").arg(&run_str);
                     c
                 }
             }
-            "javascript" | "node" => {
-                let mut c = Command::new("node");
-                c.arg("-e").arg(&final_run_cmd);
-                c
-            }
-            "lua" => {
-                let mut c = Command::new("lua");
-                c.arg("-e").arg(&final_run_cmd);
-                c
-            }
             "bash" => {
+                let run_str = if trailing.is_empty() {
+                    final_run_cmd.clone()
+                } else {
+                    format!("{} {}", final_run_cmd, trailing)
+                };
                 let mut c = Command::new("bash");
-                c.arg("-c").arg(&final_run_cmd);
+                c.arg("-c").arg(&run_str);
                 c
             }
             "zsh" => {
+                let run_str = if trailing.is_empty() {
+                    final_run_cmd.clone()
+                } else {
+                    format!("{} {}", final_run_cmd, trailing)
+                };
                 let mut c = Command::new("zsh");
-                c.arg("-c").arg(&final_run_cmd);
+                c.arg("-c").arg(&run_str);
                 c
             }
             "powershell" | "pwsh" => {
+                let run_str = if trailing.is_empty() {
+                    final_run_cmd.clone()
+                } else {
+                    format!("{} {}", final_run_cmd, trailing)
+                };
                 let mut c = Command::new("pwsh");
-                c.arg("-Command").arg(&final_run_cmd);
+                c.arg("-Command").arg(&run_str);
                 c
             }
             // Fallback for "shell", "sh", or unrecognized languages
             _ => {
+                let run_str = if trailing.is_empty() {
+                    final_run_cmd.clone()
+                } else {
+                    format!("{} {}", final_run_cmd, trailing)
+                };
                 if cfg!(target_os = "windows") {
                     let mut c = Command::new("cmd");
-                    c.args(["/C", &final_run_cmd]);
+                    c.args(["/C", &run_str]);
                     c
                 } else {
                     let mut c = Command::new("sh");
-                    c.arg("-c").arg(&final_run_cmd);
+                    c.arg("-c").arg(&run_str);
                     c
                 }
             }
