@@ -129,16 +129,17 @@ fn execute_inner<'a>(
         let lang = sigil.language.as_deref().unwrap_or("shell");
         let trailing = extra_args.join(" ");
 
+        // --- NEW LOGIC: Track temporary files for native cleanup ---
+        let mut temp_files_to_cleanup = Vec::new();
+
         let mut cmd = match lang {
             "python" | "python3" => {
                 let mut c = Command::new("python3");
-                // Pass extra_args as standard process arguments
                 c.arg("-c").arg(&final_run_cmd).args(&extra_args);
                 c
             }
             "javascript" | "node" => {
                 let mut c = Command::new("node");
-                // Pass extra_args as standard process arguments
                 c.arg("-e").arg(&final_run_cmd).args(&extra_args);
                 c
             }
@@ -152,18 +153,18 @@ fn execute_inner<'a>(
 
                 std::fs::write(src, &final_run_cmd).expect("Failed to scribe temporary C file");
 
+                // Track files for cleanup
+                temp_files_to_cleanup.push(src.to_string());
+                temp_files_to_cleanup.push(exe.to_string());
+
                 if cfg!(target_os = "windows") {
                     let mut c = Command::new("cmd");
-                    // Inject trailing args into the execution of the binary
-                    let run_str =
-                        format!("gcc {src} -o {exe} && {exe} {trailing} & del {src} {exe}");
+                    let run_str = format!("gcc {src} -o {exe} && {exe} {trailing}"); // Removed 'del'
                     c.args(["/C", &run_str]);
                     c
                 } else {
                     let mut c = Command::new("sh");
-                    // Inject trailing args into the execution of the binary
-                    let run_str =
-                        format!("gcc {src} -o {exe} && ./{exe} {trailing}; rm -f {src} {exe}");
+                    let run_str = format!("gcc {src} -o {exe} && ./{exe} {trailing}"); // Removed 'rm -f'
                     c.arg("-c").arg(&run_str);
                     c
                 }
@@ -178,16 +179,18 @@ fn execute_inner<'a>(
 
                 std::fs::write(src, &final_run_cmd).expect("Failed to scribe temporary C++ file");
 
+                // Track files for cleanup
+                temp_files_to_cleanup.push(src.to_string());
+                temp_files_to_cleanup.push(exe.to_string());
+
                 if cfg!(target_os = "windows") {
                     let mut c = Command::new("cmd");
-                    let run_str =
-                        format!("g++ {src} -o {exe} && {exe} {trailing} & del {src} {exe}");
+                    let run_str = format!("g++ {src} -o {exe} && {exe} {trailing}"); // Removed 'del'
                     c.args(["/C", &run_str]);
                     c
                 } else {
                     let mut c = Command::new("sh");
-                    let run_str =
-                        format!("g++ {src} -o {exe} && ./{exe} {trailing}; rm -f {src} {exe}");
+                    let run_str = format!("g++ {src} -o {exe} && ./{exe} {trailing}"); // Removed 'rm -f'
                     c.arg("-c").arg(&run_str);
                     c
                 }
@@ -222,7 +225,6 @@ fn execute_inner<'a>(
                 c.arg("-Command").arg(&run_str);
                 c
             }
-            // Fallback for "shell", "sh", or unrecognized languages
             _ => {
                 let run_str = if trailing.is_empty() {
                     final_run_cmd.clone()
@@ -246,6 +248,13 @@ fn execute_inner<'a>(
             .with_context(|| format!("Failed to spawn interpreter for language '{}'", lang))?;
 
         let status = child.wait().await?;
+
+        // --- NEW LOGIC: Clean up files securely via Rust ---
+        for file in temp_files_to_cleanup {
+            // .ok() silently ignores errors (e.g., if the compilation failed
+            // and the .exe was never created, we don't care, just move on)
+            std::fs::remove_file(file).ok();
+        }
 
         if !status.success() {
             bail!("Spell failed: Sigil '{}' exited with {}", name, status);
