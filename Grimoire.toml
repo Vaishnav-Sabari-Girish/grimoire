@@ -48,3 +48,15 @@ int main() {
   return 0;
 }
 '''
+
+
+# Project related sigils (For testing purposes only)
+[sigil.build]
+language = "shell"
+description = "Build the project (Use --release to build in release mode)"
+run = "cargo build --bin grim"
+
+[sigil.clean]
+language = "shell"
+description = "Clean up build artifacts"
+run = "cargo clean"

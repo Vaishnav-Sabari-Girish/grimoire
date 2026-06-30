@@ -38,9 +38,13 @@ pub fn list_sigils(config: &GrimoireConfig) {
 }
 
 /// Public entry point for casting a sigil
-pub async fn cast_sigil(config: &GrimoireConfig, name: &str) -> Result<()> {
+pub async fn cast_sigil(
+    config: &GrimoireConfig,
+    name: &str,
+    extra_args: Vec<String>,
+) -> Result<()> {
     // We pass an empty path vector to start cycle tracking
-    execute_inner(config, name, Vec::new()).await
+    execute_inner(config, name, Vec::new(), extra_args).await
 }
 
 /// Internal asynchronous recursive executor
@@ -48,6 +52,7 @@ fn execute_inner<'a>(
     config: &'a GrimoireConfig,
     name: &'a str,
     path: Vec<String>,
+    extra_args: Vec<String>,
 ) -> Pin<Box<dyn std::future::Future<Output = Result<()>> + 'a>> {
     Box::pin(async move {
         // 1. Cycle Detection
@@ -65,7 +70,7 @@ fn execute_inner<'a>(
 
         // 2. Resolve Dependencies
         for dep in &sigil.depends {
-            execute_inner(config, dep, current_path.clone()).await?;
+            execute_inner(config, dep, current_path.clone(), Vec::new()).await?;
         }
 
         // 3. Resolve Arguments
@@ -116,15 +121,26 @@ fn execute_inner<'a>(
             final_run_cmd = final_run_cmd.replace(&template_key, &val);
         }
 
+        // Notice: We completely removed the `extra_args.join(" ")` logic from here.
+
         println!("> Executing [{}]: {}", name, final_run_cmd);
 
         // 5. Fully Asynchronous Execution with Language Routing
         let lang = sigil.language.as_deref().unwrap_or("shell");
+        let trailing = extra_args.join(" ");
+
+        // Track temporary files for native cleanup
+        let mut temp_files_to_cleanup = Vec::new();
 
         let mut cmd = match lang {
             "python" | "python3" => {
                 let mut c = Command::new("python3");
-                c.arg("-c").arg(&final_run_cmd);
+                c.arg("-c").arg(&final_run_cmd).args(&extra_args);
+                c
+            }
+            "javascript" | "node" => {
+                let mut c = Command::new("node");
+                c.arg("-e").arg(&final_run_cmd).args(&extra_args);
                 c
             }
             "c" => {
@@ -134,22 +150,34 @@ fn execute_inner<'a>(
                 } else {
                     ".grimoire_tmp"
                 };
+                let exe_run = if cfg!(target_os = "windows") {
+                    ".\\.grimoire_tmp.exe"
+                } else {
+                    "./.grimoire_tmp"
+                };
 
-                // 1. Scribe the code to a temporary file
                 std::fs::write(src, &final_run_cmd).expect("Failed to scribe temporary C file");
 
-                // 2. Chain the compile, execute, and cleanup commands
-                if cfg!(target_os = "windows") {
-                    let mut c = Command::new("cmd");
-                    let run_str = format!("gcc {src} -o {exe} && {exe} & del {src} {exe}");
-                    c.args(["/C", &run_str]);
-                    c
-                } else {
-                    let mut c = Command::new("sh");
-                    let run_str = format!("gcc {src} -o {exe} && ./{exe}; rm -f {src} {exe}");
-                    c.arg("-c").arg(&run_str);
-                    c
+                temp_files_to_cleanup.push(src.to_string());
+                temp_files_to_cleanup.push(exe.to_string());
+
+                // 1. Compile synchronously (awaited)
+                let compile_status = Command::new("gcc")
+                    .args([src, "-o", exe])
+                    .status()
+                    .await
+                    .context("Failed to execute gcc. Is it installed?")?;
+
+                if !compile_status.success() {
+                    std::fs::remove_file(src).ok(); // Clean up before bailing
+                    std::fs::remove_file(exe).ok(); // Clean up before bailing
+                    bail!("C compilation failed for sigil '{}'", name);
                 }
+
+                // 2. Prepare the execution command safely
+                let mut c = Command::new(exe_run);
+                c.args(&extra_args);
+                c
             }
             "cpp" | "c++" => {
                 let src = ".grimoire_tmp.cpp";
@@ -158,67 +186,96 @@ fn execute_inner<'a>(
                 } else {
                     ".grimoire_tmp"
                 };
+                let exe_run = if cfg!(target_os = "windows") {
+                    ".\\.grimoire_tmp.exe"
+                } else {
+                    "./.grimoire_tmp"
+                };
 
-                // 1. Scribe the code to a temporary file
                 std::fs::write(src, &final_run_cmd).expect("Failed to scribe temporary C++ file");
 
-                // 2. Chain the compile, execute, and cleanup commands (using g++)
+                temp_files_to_cleanup.push(src.to_string());
+                temp_files_to_cleanup.push(exe.to_string());
+
+                // 1. Compile synchronously (awaited)
+                let compile_status = Command::new("g++")
+                    .args([src, "-o", exe])
+                    .status()
+                    .await
+                    .context("Failed to execute g++. Is it installed?")?;
+
+                if !compile_status.success() {
+                    std::fs::remove_file(src).ok(); // Clean up before bailing
+                    bail!("C++ compilation failed for sigil '{}'", name);
+                }
+
+                // 2. Prepare the execution command safely
+                let mut c = Command::new(exe_run);
+                c.args(&extra_args);
+                c
+            }
+            "bash" => {
+                let run_str = if trailing.is_empty() {
+                    final_run_cmd.clone()
+                } else {
+                    format!("{} {}", final_run_cmd, trailing)
+                };
+                let mut c = Command::new("bash");
+                c.arg("-c").arg(&run_str);
+                c
+            }
+            "zsh" => {
+                let run_str = if trailing.is_empty() {
+                    final_run_cmd.clone()
+                } else {
+                    format!("{} {}", final_run_cmd, trailing)
+                };
+                let mut c = Command::new("zsh");
+                c.arg("-c").arg(&run_str);
+                c
+            }
+            "powershell" | "pwsh" => {
+                let run_str = if trailing.is_empty() {
+                    final_run_cmd.clone()
+                } else {
+                    format!("{} {}", final_run_cmd, trailing)
+                };
+                let mut c = Command::new("pwsh");
+                c.arg("-Command").arg(&run_str);
+                c
+            }
+            _ => {
+                let run_str = if trailing.is_empty() {
+                    final_run_cmd.clone()
+                } else {
+                    format!("{} {}", final_run_cmd, trailing)
+                };
                 if cfg!(target_os = "windows") {
                     let mut c = Command::new("cmd");
-                    let run_str = format!("g++ {src} -o {exe} && {exe} & del {src} {exe}");
                     c.args(["/C", &run_str]);
                     c
                 } else {
                     let mut c = Command::new("sh");
-                    let run_str = format!("g++ {src} -o {exe} && ./{exe}; rm -f {src} {exe}");
                     c.arg("-c").arg(&run_str);
                     c
                 }
             }
-            "javascript" | "node" => {
-                let mut c = Command::new("node");
-                c.arg("-e").arg(&final_run_cmd);
-                c
-            }
-            "lua" => {
-                let mut c = Command::new("lua");
-                c.arg("-e").arg(&final_run_cmd);
-                c
-            }
-            "bash" => {
-                let mut c = Command::new("bash");
-                c.arg("-c").arg(&final_run_cmd);
-                c
-            }
-            "zsh" => {
-                let mut c = Command::new("zsh");
-                c.arg("-c").arg(&final_run_cmd);
-                c
-            }
-            "powershell" | "pwsh" => {
-                let mut c = Command::new("pwsh");
-                c.arg("-Command").arg(&final_run_cmd);
-                c
-            }
-            // Fallback for "shell", "sh", or unrecognized languages
-            _ => {
-                if cfg!(target_os = "windows") {
-                    let mut c = Command::new("cmd");
-                    c.args(["/C", &final_run_cmd]);
-                    c
-                } else {
-                    let mut c = Command::new("sh");
-                    c.arg("-c").arg(&final_run_cmd);
-                    c
-                }
-            }
         };
+
+        // ... the rest of the spawn, wait, and cleanup code remains exactly the same
 
         let mut child = cmd
             .spawn()
             .with_context(|| format!("Failed to spawn interpreter for language '{}'", lang))?;
 
         let status = child.wait().await?;
+
+        // --- NEW LOGIC: Clean up files securely via Rust ---
+        for file in temp_files_to_cleanup {
+            // .ok() silently ignores errors (e.g., if the compilation failed
+            // and the .exe was never created, we don't care, just move on)
+            std::fs::remove_file(file).ok();
+        }
 
         if !status.success() {
             bail!("Spell failed: Sigil '{}' exited with {}", name, status);
