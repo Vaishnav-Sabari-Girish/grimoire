@@ -170,6 +170,7 @@ fn execute_inner<'a>(
 
                 if !compile_status.success() {
                     std::fs::remove_file(src).ok(); // Clean up before bailing
+                    std::fs::remove_file(exe).ok(); // Clean up before bailing
                     bail!("C compilation failed for sigil '{}'", name);
                 }
 
