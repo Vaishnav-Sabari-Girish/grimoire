@@ -30,11 +30,10 @@ I am using `grimoire` in this project too. Take a look at
 cargo install grim
 ```
 
-For the latest development version
+For the latest development version:
 
 ```bash
 cargo install --git https://github.com/Vaishnav-Sabari-Girish/grimoire
-
 ```
 
 *(Note: Installing via cargo will provide both the `grimoire` and `grim`
@@ -48,7 +47,6 @@ Initialize a new project:
 
 ```bash
 grim init
-
 ```
 
 Create a `Grimoire.toml`:
@@ -65,21 +63,18 @@ run = "echo 'Welcome to Grimoire!'"
 [sigil.bye]
 description = "Bye Spell"
 run = "echo 'Bye From Grimoire'"
-
 ```
 
 Run a sigil:
 
 ```bash
 grim cast hello
-
 ```
 
 List available sigils:
 
 ```bash
 grim sigils
-
 ```
 
 ---
@@ -104,7 +99,6 @@ choices = [
   "Option 3"
 ]
 default = "Option 1"
-
 ```
 
 When you run `grim cast options`, Grimoire will open an interactive TUI menu for
@@ -134,7 +128,6 @@ description = "Hello in javascript"
 run = """
 console.log("Hello World");
 """
-
 ```
 
 ### Compiled Languages (C / C++)
@@ -171,7 +164,6 @@ int main() {
     return 0;
 }
 '''
-
 ```
 
 ---
@@ -198,9 +190,6 @@ Grimoire aims to make automation:
 * Portable
 * Language-agnostic
 * Pleasant to use
-
-Underneath the magical terminology is a serious, production-grade automation
-tool.
 
 ---
 
