@@ -6,6 +6,10 @@ use std::fs;
 #[derive(Debug, Deserialize)]
 pub struct GrimoireConfig {
     pub version: String,
+
+    #[serde(default)]
+    pub ingredients: HashMap<String, String>,
+
     #[serde(rename = "sigil")]
     pub sigils: HashMap<String, Sigil>,
 }

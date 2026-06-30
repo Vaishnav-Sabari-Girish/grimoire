@@ -1,5 +1,17 @@
 version = "1"
 
+[ingredients]
+hello_g = "Hello Global Var"
+bye_g = "Bye Global Var"
+
+[sigil.global]
+description = "Prints global vars"
+language = "shell"
+run = '''
+echo {{hello_g}} 
+echo {{bye_g}}
+'''
+
 [sigil.hello]
 description = "A Simple Welcome spell"
 language = "shell"

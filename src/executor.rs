@@ -114,14 +114,22 @@ fn execute_inner<'a>(
             }
         }
 
-        // 4. Inject resolved arguments into the run string
         let mut final_run_cmd = sigil.run.clone();
+
+        let mut merged_args = HashMap::new();
+
+        for (key, val) in &config.ingredients {
+            merged_args.insert(key.clone(), val.clone());
+        }
+
         for (key, val) in resolved_args {
+            merged_args.insert(key, val);
+        }
+
+        for (key, val) in merged_args {
             let template_key = format!("{{{{{}}}}}", key);
             final_run_cmd = final_run_cmd.replace(&template_key, &val);
         }
-
-        // Notice: We completely removed the `extra_args.join(" ")` logic from here.
 
         println!("> Executing [{}]: {}", name, final_run_cmd);
 
@@ -262,18 +270,13 @@ fn execute_inner<'a>(
             }
         };
 
-        // ... the rest of the spawn, wait, and cleanup code remains exactly the same
-
         let mut child = cmd
             .spawn()
             .with_context(|| format!("Failed to spawn interpreter for language '{}'", lang))?;
 
         let status = child.wait().await?;
 
-        // --- NEW LOGIC: Clean up files securely via Rust ---
         for file in temp_files_to_cleanup {
-            // .ok() silently ignores errors (e.g., if the compilation failed
-            // and the .exe was never created, we don't care, just move on)
             std::fs::remove_file(file).ok();
         }
 
