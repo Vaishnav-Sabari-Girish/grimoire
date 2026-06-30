@@ -129,7 +129,7 @@ fn execute_inner<'a>(
         let lang = sigil.language.as_deref().unwrap_or("shell");
         let trailing = extra_args.join(" ");
 
-        // --- NEW LOGIC: Track temporary files for native cleanup ---
+        // Track temporary files for native cleanup
         let mut temp_files_to_cleanup = Vec::new();
 
         let mut cmd = match lang {
@@ -150,24 +150,33 @@ fn execute_inner<'a>(
                 } else {
                     ".grimoire_tmp"
                 };
+                let exe_run = if cfg!(target_os = "windows") {
+                    ".\\.grimoire_tmp.exe"
+                } else {
+                    "./.grimoire_tmp"
+                };
 
                 std::fs::write(src, &final_run_cmd).expect("Failed to scribe temporary C file");
 
-                // Track files for cleanup
                 temp_files_to_cleanup.push(src.to_string());
                 temp_files_to_cleanup.push(exe.to_string());
 
-                if cfg!(target_os = "windows") {
-                    let mut c = Command::new("cmd");
-                    let run_str = format!("gcc {src} -o {exe} && {exe} {trailing}"); // Removed 'del'
-                    c.args(["/C", &run_str]);
-                    c
-                } else {
-                    let mut c = Command::new("sh");
-                    let run_str = format!("gcc {src} -o {exe} && ./{exe} {trailing}"); // Removed 'rm -f'
-                    c.arg("-c").arg(&run_str);
-                    c
+                // 1. Compile synchronously (awaited)
+                let compile_status = Command::new("gcc")
+                    .args([src, "-o", exe])
+                    .status()
+                    .await
+                    .context("Failed to execute gcc. Is it installed?")?;
+
+                if !compile_status.success() {
+                    std::fs::remove_file(src).ok(); // Clean up before bailing
+                    bail!("C compilation failed for sigil '{}'", name);
                 }
+
+                // 2. Prepare the execution command safely
+                let mut c = Command::new(exe_run);
+                c.args(&extra_args);
+                c
             }
             "cpp" | "c++" => {
                 let src = ".grimoire_tmp.cpp";
@@ -176,24 +185,33 @@ fn execute_inner<'a>(
                 } else {
                     ".grimoire_tmp"
                 };
+                let exe_run = if cfg!(target_os = "windows") {
+                    ".\\.grimoire_tmp.exe"
+                } else {
+                    "./.grimoire_tmp"
+                };
 
                 std::fs::write(src, &final_run_cmd).expect("Failed to scribe temporary C++ file");
 
-                // Track files for cleanup
                 temp_files_to_cleanup.push(src.to_string());
                 temp_files_to_cleanup.push(exe.to_string());
 
-                if cfg!(target_os = "windows") {
-                    let mut c = Command::new("cmd");
-                    let run_str = format!("g++ {src} -o {exe} && {exe} {trailing}"); // Removed 'del'
-                    c.args(["/C", &run_str]);
-                    c
-                } else {
-                    let mut c = Command::new("sh");
-                    let run_str = format!("g++ {src} -o {exe} && ./{exe} {trailing}"); // Removed 'rm -f'
-                    c.arg("-c").arg(&run_str);
-                    c
+                // 1. Compile synchronously (awaited)
+                let compile_status = Command::new("g++")
+                    .args([src, "-o", exe])
+                    .status()
+                    .await
+                    .context("Failed to execute g++. Is it installed?")?;
+
+                if !compile_status.success() {
+                    std::fs::remove_file(src).ok(); // Clean up before bailing
+                    bail!("C++ compilation failed for sigil '{}'", name);
                 }
+
+                // 2. Prepare the execution command safely
+                let mut c = Command::new(exe_run);
+                c.args(&extra_args);
+                c
             }
             "bash" => {
                 let run_str = if trailing.is_empty() {
@@ -242,6 +260,8 @@ fn execute_inner<'a>(
                 }
             }
         };
+
+        // ... the rest of the spawn, wait, and cleanup code remains exactly the same
 
         let mut child = cmd
             .spawn()
