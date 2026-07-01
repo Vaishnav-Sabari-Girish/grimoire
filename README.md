@@ -17,6 +17,7 @@ I am using `grimoire` in this project too. Take a look at
 * 🌍 Multi-language support (Shell, Python, Node, Bash, C, C++)
 * 🔗 Dependency management (DAG with cycle detection)
 * 🎛 **Interactive prompts and arguments via Terminal UI**
+* 🤫 **Silent execution modes**
 * 📝 Self-documenting workflows
 * 💻 Cross-platform (Linux, macOS, Windows)
 
@@ -33,7 +34,7 @@ cargo install grim
 For the latest development version:
 
 ```bash
-cargo install --git https://github.com/Vaishnav-Sabari-Girish/grimoire
+cargo install --git [https://github.com/Vaishnav-Sabari-Girish/grimoire](https://github.com/Vaishnav-Sabari-Girish/grimoire)
 ```
 
 *(Note: Installing via cargo will provide both the `grimoire` and `grim`
@@ -79,6 +80,30 @@ grim sigils
 
 ---
 
+## Global Ingredients (Variables)
+
+You can define global variables at the top of your `Grimoire.toml` using the
+`[ingredients]` table to share values across multiple sigils.
+
+*(Note: Local interactive arguments will automatically shadow and override
+global ingredients if they share the same name).*
+
+```toml
+version = "1"
+
+[ingredients]
+target_dir = "./release_bins"
+c_compiler = "gcc"
+
+[sigil.build_c]
+language = "c"
+run = '''
+{{c_compiler}} main.c -o {{target_dir}}/app
+'''
+```
+
+---
+
 ## Interactive Ingredients (Arguments)
 
 Grimoire can pause execution and prompt the user for input using beautiful
@@ -103,6 +128,24 @@ default = "Option 1"
 
 When you run `grim cast options`, Grimoire will open an interactive TUI menu for
 you to select the desired option before executing the spell!
+
+---
+
+## Silent Execution
+
+By default, Grimoire echoes the exact command string it is about to run. You can
+suppress this terminal output for specific tasks by adding `silent = true`.
+
+```toml
+[sigil.global]
+description = "Prints global vars cleanly"
+language = "shell"
+silent = true
+run = '''
+echo {{hello_g}} 
+echo {{bye_g}}
+'''
+```
 
 ---
 
@@ -190,6 +233,9 @@ Grimoire aims to make automation:
 * Portable
 * Language-agnostic
 * Pleasant to use
+
+Underneath the magical terminology is a serious, production-grade automation
+tool.
 
 ---
 
