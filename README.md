@@ -31,14 +31,28 @@ I am using `grimoire` in this project too. Take a look at
 cargo install grim
 ```
 
+To install pre-compiled binaries
+
+```bash
+cargo binstall grim
+```
+
 For the latest development version:
 
 ```bash
-cargo install --git [https://github.com/Vaishnav-Sabari-Girish/grimoire](https://github.com/Vaishnav-Sabari-Girish/grimoire)
+cargo install --git https://github.com/Vaishnav-Sabari-Girish/grimoire
 ```
 
 *(Note: Installing via cargo will provide both the `grimoire` and `grim`
 executables).*
+
+### From source
+
+```bash
+git clone https://github.com/Vaishnav-Sabari-Girish/grimoire.git
+cd grimoire
+cargo run --bin grim --release
+```
 
 ---
 
