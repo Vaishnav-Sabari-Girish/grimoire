@@ -1,4 +1,45 @@
 
+## v0.3.0 - 2026-07-01
+
+
+
+
+
+
+
+### :rocket: New features
+
+- **(silent)** Add `silent = true` to suppress execution echo
+
+- **(global_vars)** Global Variables support
+
+
+
+
+
+
+### :bug: Bug fixes
+
+- **(executor)** Correct variable shadowing and polish documentation
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## v0.2.0 - 2026-06-30
 
 
