@@ -23,6 +23,9 @@ pub struct Sigil {
     pub depends: Vec<String>,
     #[serde(default)]
     pub args: HashMap<String, ArgDef>,
+
+    #[serde(default)]
+    pub silent: bool,
 }
 
 #[derive(Debug, Deserialize)]

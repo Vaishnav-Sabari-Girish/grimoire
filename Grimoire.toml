@@ -1,3 +1,5 @@
+# This Grimoire.toml is an example
+
 version = "1"
 
 [ingredients]
@@ -10,6 +12,19 @@ language = "shell"
 run = '''
 echo {{hello_g}} 
 echo {{bye_g}}
+'''
+
+[sigil.silent_ex]
+silent = true
+description = "Run in silent mode. Prints only the output"
+language = "c++"
+run = '''
+#include <iostream>
+
+int main() {
+  std::cout << "Hello World" << std::endl;
+  return 0;
+}
 '''
 
 [sigil.hello]

@@ -131,7 +131,9 @@ fn execute_inner<'a>(
             final_run_cmd = final_run_cmd.replace(&template_key, &val);
         }
 
-        println!("> Executing [{}]: {}", name, final_run_cmd);
+        if !sigil.silent {
+            println!("> Executing [{}]: {}", name, final_run_cmd);
+        }
 
         // 5. Fully Asynchronous Execution with Language Routing
         let lang = sigil.language.as_deref().unwrap_or("shell");
