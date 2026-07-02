@@ -1,4 +1,4 @@
-use anyhow::{Context, Ok, Result};
+use anyhow::{Context, Ok, Result, bail};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs;
@@ -59,10 +59,28 @@ pub fn load_grimoire() -> Result<GrimoireConfig> {
         toml::from_str(&config_content).context("Failed to parse the Grimoire file.")?;
 
     let mut ingredients = raw.ingredients;
-    ingredients.extend(raw.global);
+    for (key, val) in raw.global {
+        if ingredients.contains_key(&key) {
+            bail!(
+                "Config error: '{}' is defined in both [ingredients] and [global]. Please use only one.",
+                key
+            );
+        }
+        ingredients.insert(key, val);
+    }
 
     let mut sigils = raw.sigil;
-    sigils.extend(raw.task);
+    for (key, val) in raw.task {
+        if sigils.contains_key(&key) {
+            bail!(
+                "Config error: Ambiguous definition for '{}'. Cannot use both [sigil.{}] and [task.{}].",
+                key,
+                key,
+                key
+            );
+        }
+        sigils.insert(key, val);
+    }
 
     Ok(GrimoireConfig {
         version: raw.version,

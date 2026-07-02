@@ -161,7 +161,7 @@ default = "sigils"
 [task.echo_task]
 description = "This uses the 'task' alias instead of 'sigil'"
 silent = true
-run = "echo 'Uses task instead of 'sigil''"
+run = "echo \"Uses task instead of 'sigil'\""
 
 [task.global_print]
 description = "Printing Global variables Part - 2, but using [global] instead of [ingredients]"
