@@ -5,6 +5,7 @@ version = "1"
 [ingredients]
 hello_g = "Hello Global Var"
 bye_g = "Bye Global Var"
+greeting = "This is a global greeting"
 
 [sigil.global]
 description = "Prints global vars"
@@ -87,3 +88,48 @@ run = "cargo build --bin grim"
 language = "shell"
 description = "Clean up build artifacts"
 run = "cargo clean"
+
+# Run script file
+## Python
+[sigil.py]
+description = "Cast the python script interactively"
+silent = true
+run = "scripts/test_grim.py {{target}}"
+
+[sigil.py.args.target]
+type = "select"
+choices = [
+  "Frieren",
+  "Fern",
+  "Stark",
+  "Hero of the South"
+]
+default = "Frieren"
+
+## Rust
+[sigil.rs]
+description = "Run a Rust file"
+silent = true
+run = "scripts/test_grim.rs"
+
+## Bash
+[sigil.sh]
+description = "Run a shell script file"
+silent = true
+run = "scripts/test_grim.sh '{{greeting}}'"
+
+## Node
+[sigil.js]
+description = "Cast the Node script"
+silent = true
+run = "scripts/test_grim.js '{{target}}'"
+
+[sigil.js.args.target]
+type = "select"
+choices = [
+  "Frieren",
+  "Fern",
+  "Stark",
+  "Hero of the South"
+]
+default = "Frieren"
