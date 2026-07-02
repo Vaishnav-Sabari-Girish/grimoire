@@ -13,7 +13,7 @@ I am using `grimoire` in this project too. Take a look at
 ## Features
 
 * Declarative `Grimoire.toml` configuration
-* Tasks called **Sigils**
+* Tasks called **Sigils** (with full support for standard `task` terminology)
 * Multi-language support (Shell, Python, Node, Bash, C, C++)
 * **Native script file execution with cross-platform shebang auto-detection**
 * Dependency management (DAG with cycle detection)
@@ -65,7 +65,7 @@ Create a `Grimoire.toml`:
 ```toml
 version = "1"
 
-[sigil.hello]
+[sigil.hello]   # Or [task.hello]
 description = "A Simple Welcome spell"
 language = "shell"
 run = "echo 'Welcome to Grimoire!'"
@@ -80,12 +80,14 @@ Run a sigil:
 
 ```bash
 grim cast hello
+# or use standard terms: grim run hello
 ```
 
 List available sigils:
 
 ```bash
 grim sigils
+# or use standard terms: grim list or grim tasks
 ```
 
 List supported magical tongues (languages):
@@ -106,7 +108,7 @@ global ingredients if they share the same name).*
 ```toml
 version = "1"
 
-[ingredients]
+[ingredients] # [global] can also be used
 target_dir = "./release_bins"
 c_compiler = "gcc"
 
@@ -115,6 +117,7 @@ language = "c"
 run = '''
 {{c_compiler}} main.c -o {{target_dir}}/app
 '''
+
 ```
 
 ## Interactive Ingredients (Arguments)
@@ -137,6 +140,7 @@ choices = [
   "Option 3"
 ]
 default = "Option 1"
+
 ```
 
 When you run `grim cast options`, Grimoire will open an interactive TUI menu for
@@ -156,6 +160,7 @@ run = '''
 echo {{hello_g}} 
 echo {{bye_g}}
 '''
+
 ```
 
 ## Passing Flags to Interactive Commands
@@ -174,6 +179,7 @@ description = "Run the project"
 language = "shell"
 # Note the trailing '--' here so appended arguments go straight to the binary
 run = "cargo run --features {{features}} --"
+
 ```
 
 Now you can simply run `grim cast run --simulate` without any parsing errors!
@@ -185,6 +191,7 @@ pass one down to the underlying command:
 
 ```bash
 grim cast run -- -- --simulate
+
 ```
 
 ## Multi-Language Sigils
@@ -212,6 +219,7 @@ run = "scripts/test.py '{{target}}'"
 description = "Cast a Node.js script directly"
 silent = true
 run = "scripts/test.js '{{target}}'"
+
 ```
 
 ### Interpreted Languages (Inline)
@@ -230,6 +238,7 @@ description = "Hello in javascript"
 run = """
 console.log("Hello World");
 """
+
 ```
 
 ### Compiled Languages (C / C++)
@@ -267,6 +276,7 @@ int main() {
 }
 '''
 
+
 ```
 
 ## Concepts
@@ -277,6 +287,33 @@ int main() {
 | Sigil | A task or command |
 | Cast | Execute a sigil |
 | Ingredients | Parameters and variables |
+
+## Aliases & Standard Terminology
+
+Grimoire is built to fit your team's workflow. While it defaults to a magical
+theme, it acts identically if you use standard task runner terminology.
+
+**In your `Grimoire.toml`:** You can freely substitute terminology to fit your
+preferences. You can mix and match these in the same file!
+
+* Replace `[sigil]` with `[task]`.
+* Replace `[ingredients]` with `[global]`.
+
+```toml
+[variables]
+target = "release"
+
+[task.build]
+description = "A standard build task"
+run = "cargo build"
+
+```
+
+**In the CLI:**
+All standard commands map back to their magical counterparts instantly:
+
+* `grim run <name>` works identically to `grim cast <name>`
+* `grim tasks` or `grim list` works identically to `grim sigils`
 
 ## Philosophy
 

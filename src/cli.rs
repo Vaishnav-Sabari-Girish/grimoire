@@ -18,6 +18,7 @@ pub enum Commands {
     Init,
 
     /// Cast a Specific Sigil/Spell (Task) defined in your Grimoire.toml
+    #[command(visible_aliases = ["run"])]
     Cast {
         name: String,
 
@@ -26,6 +27,7 @@ pub enum Commands {
     },
 
     /// List all available Sigils/Spells (Tasks) in your current spellbook
+    #[command(visible_aliases = ["tasks", "list"])]
     Sigils,
 
     /// List all the tongues (Languages) supported by Grimoire

@@ -2,6 +2,9 @@
 
 version = "1"
 
+[global]   # The same thing as ingredients
+global_var_1 = "This is global_var_1"
+
 [ingredients]
 hello_g = "Hello Global Var"
 bye_g = "Bye Global Var"
@@ -138,6 +141,7 @@ default = "Frieren"
 [sigil.intargflag]
 description = "Showing working of CLI flags with Interactive arguments"
 run = "cargo run --bin grim --release -- {{flags}}"
+silent = true
 
 [sigil.intargflag.args.flags]
 type = "select"
@@ -151,3 +155,15 @@ choices = [
   "--version"
 ]
 default = "sigils"
+
+
+# Use common terminologies (Optional)
+[task.echo_task]
+description = "This uses the 'task' alias instead of 'sigil'"
+silent = true
+run = "echo \"Uses task instead of 'sigil'\""
+
+[task.global_print]
+description = "Printing Global variables Part - 2, but using [global] instead of [ingredients]"
+silent = true
+run = "echo 'Global Variable 1 {{global_var_1}}'"
