@@ -133,3 +133,21 @@ choices = [
   "Hero of the South"
 ]
 default = "Frieren"
+
+# Interactive Arguments with CLI flags
+[sigil.intargflag]
+description = "Showing working of CLI flags with Interactive arguments"
+run = "cargo run --bin grim --release -- {{flags}}"
+
+[sigil.intargflag.args.flags]
+type = "select"
+choices = [
+  "sigils",
+  "cast py",
+  "cast js",
+  "cast rs",
+  "cast sh",
+  "--help",
+  "--version"
+]
+default = "sigils"
