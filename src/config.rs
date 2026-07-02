@@ -4,13 +4,24 @@ use std::collections::HashMap;
 use std::fs;
 
 #[derive(Debug, Deserialize)]
-pub struct GrimoireConfig {
+struct RawConfig {
     pub version: String,
 
     #[serde(default)]
     pub ingredients: HashMap<String, String>,
+    #[serde(default)]
+    pub global: HashMap<String, String>,
 
-    #[serde(rename = "sigil")]
+    #[serde(default)]
+    pub sigil: HashMap<String, Sigil>,
+    #[serde(default)]
+    pub task: HashMap<String, Sigil>,
+}
+
+#[derive(Debug)]
+pub struct GrimoireConfig {
+    pub version: String,
+    pub ingredients: HashMap<String, String>,
     pub sigils: HashMap<String, Sigil>,
 }
 
@@ -40,13 +51,22 @@ pub enum ArgDef {
     },
 }
 
-// Attempts to find and load the Grimoire.toml
 pub fn load_grimoire() -> Result<GrimoireConfig> {
     let config_content = fs::read_to_string("Grimoire.toml")
         .context("Failed to find or read Grimoire.toml in the current directory")?;
 
-    let config: GrimoireConfig =
+    let raw: RawConfig =
         toml::from_str(&config_content).context("Failed to parse the Grimoire file.")?;
 
-    Ok(config)
+    let mut ingredients = raw.ingredients;
+    ingredients.extend(raw.global);
+
+    let mut sigils = raw.sigil;
+    sigils.extend(raw.task);
+
+    Ok(GrimoireConfig {
+        version: raw.version,
+        ingredients,
+        sigils,
+    })
 }
