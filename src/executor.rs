@@ -334,7 +334,7 @@ fn execute_inner<'a>(
             Ok(c) => c,
             Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
                 bail!(
-                    "Spell failed: Permission denied. Ensure '{}' has execution rights (e.g., chmod +x).",
+                    "Spell failed: Permission denied while starting '{}'. Check execute permissions for the target file or interpreter.",
                     final_run_cmd
                 );
             }
