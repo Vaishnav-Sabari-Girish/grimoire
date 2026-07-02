@@ -306,25 +306,20 @@ fn execute_inner<'a>(
                 c
             }
             _ => {
-                if is_file {
-                    let mut c = Command::new(&final_run_cmd);
-                    c.args(&extra_args);
+                let run_str = if trailing.is_empty() {
+                    final_run_cmd.clone()
+                } else {
+                    format!("{} {}", final_run_cmd, trailing)
+                };
+
+                if cfg!(target_os = "windows") {
+                    let mut c = Command::new("cmd");
+                    c.args(["/C", &run_str]);
                     c
                 } else {
-                    let run_str = if trailing.is_empty() {
-                        final_run_cmd.clone()
-                    } else {
-                        format!("{} {}", final_run_cmd, trailing)
-                    };
-                    if cfg!(target_os = "windows") {
-                        let mut c = Command::new("cmd");
-                        c.args(["/C", &run_str]);
-                        c
-                    } else {
-                        let mut c = Command::new("sh");
-                        c.arg("-c").arg(&run_str);
-                        c
-                    }
+                    let mut c = Command::new("sh");
+                    c.arg("-c").arg(&run_str);
+                    c
                 }
             }
         };
