@@ -1,4 +1,53 @@
 
+## v0.4.0 - 2026-07-02
+
+
+
+
+
+
+
+### :rocket: New features
+
+- **(print_order)** Print the list of tasks in order defined in the file
+
+- **(common)** `grim` now uses common terms like `tasks`
+
+- Add `lang` command, CLI documentation, and bump version to 0.4.0
+
+- **(script_files)** `grimoire` now supports running script files
+
+
+
+
+
+
+### :bug: Bug fixes
+
+- **(inambiguous)** Fixed inambiguous task resolution
+
+- Use structured arguments for direct file execution
+
+- Restore standard shell context for default language fallback
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## v0.3.0 - 2026-07-01
 
 
