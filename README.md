@@ -91,8 +91,8 @@ grim sigils
 List supported magical tongues (languages):
 
 ```bash
-grim tongues
-# or use the alias: grim lang
+grim lang
+# or use the alias: grim tongues
 ```
 
 ## Global Ingredients (Variables)
@@ -158,6 +158,35 @@ echo {{bye_g}}
 '''
 ```
 
+## Passing Flags to Interactive Commands
+
+Sometimes you want to pass extra command-line flags (like `--simulate` or
+`--verbose`) directly to the underlying tool without the interactive menu
+intercepting them.
+
+**Option 1: Baked into Grimoire.toml (Recommended)** The most frictionless way
+is to bake the standard `--` separator directly into your `run` string. This
+tells underlying tools (like Cargo) to accept the appended flags naturally:
+
+```toml
+[sigil.run]
+description = "Run the project"
+language = "shell"
+# Note the trailing '--' here so appended arguments go straight to the binary
+run = "cargo run --features {{features}} --"
+```
+
+Now you can simply run `grim cast run --simulate` without any parsing errors!
+
+**Option 2: In the CLI (Double Separator)** If you do not want to change your
+`Grimoire.toml`, you must pass the separator in the CLI. Because Grimoire's own
+CLI parser consumes the first `--` it sees, you need to use two if you want to
+pass one down to the underlying command:
+
+```bash
+grim cast run -- -- --simulate
+```
+
 ## Multi-Language Sigils
 
 Grimoire does not assume everything is a shell script. Every sigil can specify
@@ -201,7 +230,6 @@ description = "Hello in javascript"
 run = """
 console.log("Hello World");
 """
-
 ```
 
 ### Compiled Languages (C / C++)
