@@ -359,3 +359,19 @@ fn execute_inner<'a>(
         Ok(())
     })
 }
+
+pub fn list_languages() {
+    println!("Known Tongues (Supported Languages) in Grimoire:\n");
+
+    println!("  {:<15} - Default system shell (Fallback)", "shell");
+    println!("  {:<15} - Bourne Again SHell", "bash");
+    println!("  {:<15} - Z Shell", "zsh");
+    println!("  {:<15} - PowerShell (pwsh / powershell)", "powershell");
+    println!("  {:<15} - Python 3 (python / python3)", "python");
+    println!("  {:<15} - Node.js (javascript / node)", "javascript");
+    println!("  {:<15} - C (compiled via gcc)", "c");
+    println!("  {:<15} - C++ (compiled via g++)", "cpp");
+
+    println!("\nNote: If your run command points to a file (e.g., 'scripts/spell.py'),");
+    println!("Grimoire can auto-detect the tongue natively using the file's shebang!");
+}

@@ -14,12 +14,22 @@ pub struct Cli {
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
+    /// Scribe (Generate) a default Grimoire.toml in the CWD (Current Working directory)
     Init,
+
+    /// Cast a Specific Sigil/Spell (Task) defined in your Grimoire.toml
     Cast {
         name: String,
 
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
         extra_args: Vec<String>,
     },
+
+    /// List all available Sigils/Spells (Tasks) in your current spellbook
     Sigils,
+
+    /// List all the tongues (Languages) supported by Grimoire
+    /// [alias: tongues]
+    #[command(alias = "tongues")]
+    Lang,
 }
