@@ -1,6 +1,6 @@
 use anyhow::{Context, Ok, Result, bail};
+use indexmap::IndexMap;
 use serde::Deserialize;
-use std::collections::HashMap;
 use std::fs;
 
 #[derive(Debug, Deserialize)]
@@ -8,21 +8,21 @@ struct RawConfig {
     pub version: String,
 
     #[serde(default)]
-    pub ingredients: HashMap<String, String>,
+    pub ingredients: IndexMap<String, String>,
     #[serde(default)]
-    pub global: HashMap<String, String>,
+    pub global: IndexMap<String, String>,
 
     #[serde(default)]
-    pub sigil: HashMap<String, Sigil>,
+    pub sigil: IndexMap<String, Sigil>,
     #[serde(default)]
-    pub task: HashMap<String, Sigil>,
+    pub task: IndexMap<String, Sigil>,
 }
 
 #[derive(Debug)]
 pub struct GrimoireConfig {
     pub version: String,
-    pub ingredients: HashMap<String, String>,
-    pub sigils: HashMap<String, Sigil>,
+    pub ingredients: IndexMap<String, String>,
+    pub sigils: IndexMap<String, Sigil>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -33,7 +33,7 @@ pub struct Sigil {
     #[serde(default)]
     pub depends: Vec<String>,
     #[serde(default)]
-    pub args: HashMap<String, ArgDef>,
+    pub args: IndexMap<String, ArgDef>,
 
     #[serde(default)]
     pub silent: bool,

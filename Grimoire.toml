@@ -10,7 +10,7 @@ hello_g = "Hello Global Var"
 bye_g = "Bye Global Var"
 greeting = "This is a global greeting"
 
-[sigil.global]
+[sigil.print_global]
 description = "Prints global vars"
 language = "shell"
 run = '''
