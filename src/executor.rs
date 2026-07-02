@@ -306,27 +306,45 @@ fn execute_inner<'a>(
                 c
             }
             _ => {
-                let run_str = if trailing.is_empty() {
-                    final_run_cmd.clone()
+                if is_file {
+                    let mut c = Command::new(&final_run_cmd);
+                    c.args(&extra_args);
+                    c
                 } else {
-                    format!("{} {}", final_run_cmd, trailing)
-                };
+                    let run_str = if trailing.is_empty() {
+                        final_run_cmd.clone()
+                    } else {
+                        format!("{} {}", final_run_cmd, trailing)
+                    };
 
-                if cfg!(target_os = "windows") {
-                    let mut c = Command::new("cmd");
-                    c.args(["/C", &run_str]);
-                    c
-                } else {
-                    let mut c = Command::new("sh");
-                    c.arg("-c").arg(&run_str);
-                    c
+                    if cfg!(target_os = "windows") {
+                        let mut c = Command::new("cmd");
+                        c.args(["/C", &run_str]);
+                        c
+                    } else {
+                        let mut c = Command::new("sh");
+                        c.arg("-c").arg(&run_str);
+                        c
+                    }
                 }
             }
         };
 
-        let mut child = cmd
-            .spawn()
-            .with_context(|| format!("Failed to spawn interpreter for language '{}'", lang))?;
+        let mut child = match cmd.spawn() {
+            Ok(c) => c,
+            Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
+                bail!(
+                    "Spell failed: Permission denied. Ensure '{}' has execution rights (e.g., chmod +x).",
+                    final_run_cmd
+                );
+            }
+            Err(e) => {
+                return Err(anyhow::Error::new(e).context(format!(
+                    "Failed to spawn interpreter for language '{}'",
+                    lang
+                )));
+            }
+        };
 
         let status = child.wait().await?;
 
