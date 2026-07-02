@@ -1,4 +1,4 @@
-# 🔮 Grimoire
+# Grimoire
 
 > A language-agnostic task runner where commands become sigils and automation
 > becomes magic.
@@ -12,16 +12,14 @@ I am using `grimoire` in this project too. Take a look at
 
 ## Features
 
-* 📖 Declarative `Grimoire.toml` configuration
-* 🪄 Tasks called **Sigils**
-* 🌍 Multi-language support (Shell, Python, Node, Bash, C, C++)
-* 🔗 Dependency management (DAG with cycle detection)
-* 🎛 **Interactive prompts and arguments via Terminal UI**
-* 🤫 **Silent execution modes**
-* 📝 Self-documenting workflows
-* 💻 Cross-platform (Linux, macOS, Windows)
-
----
+* Declarative `Grimoire.toml` configuration
+* Tasks called **Sigils**
+* Multi-language support (Shell, Python, Node, Bash, C, C++)
+* **Native script file execution with cross-platform shebang auto-detection**
+* Dependency management (DAG with cycle detection)
+* **Interactive prompts and arguments via Terminal UI**
+* **Silent execution modes**
+* Cross-platform (Linux, macOS, Windows)
 
 ## Installation
 
@@ -53,8 +51,6 @@ git clone https://github.com/Vaishnav-Sabari-Girish/grimoire.git
 cd grimoire
 cargo run --bin grim --release
 ```
-
----
 
 ## Quick Start
 
@@ -92,7 +88,12 @@ List available sigils:
 grim sigils
 ```
 
----
+List supported magical tongues (languages):
+
+```bash
+grim tongues
+# or use the alias: grim lang
+```
 
 ## Global Ingredients (Variables)
 
@@ -115,8 +116,6 @@ run = '''
 {{c_compiler}} main.c -o {{target_dir}}/app
 '''
 ```
-
----
 
 ## Interactive Ingredients (Arguments)
 
@@ -143,8 +142,6 @@ default = "Option 1"
 When you run `grim cast options`, Grimoire will open an interactive TUI menu for
 you to select the desired option before executing the spell!
 
----
-
 ## Silent Execution
 
 By default, Grimoire echoes the exact command string it is about to run. You can
@@ -161,15 +158,34 @@ echo {{bye_g}}
 '''
 ```
 
----
-
 ## Multi-Language Sigils
 
 Grimoire does not assume everything is a shell script. Every sigil can specify
 its own runtime. *(Note: The host machine must have the respective interpreter
 or compiler installed).*
 
-### Interpreted Languages
+### Direct Script Execution (Shebangs)
+
+If you are executing a physical file, Grimoire can natively read the file's
+shebang (e.g., `#!/usr/bin/env python3`) to auto-detect the language! You can
+omit the `language` field entirely.
+
+Make sure your script files have execution rights (`chmod +x`), and wrap your
+injected variables in single quotes:
+
+```toml
+[sigil.py]
+description = "Cast a Python script directly"
+silent = true
+run = "scripts/test.py '{{target}}'"
+
+[sigil.js]
+description = "Cast a Node.js script directly"
+silent = true
+run = "scripts/test.js '{{target}}'"
+```
+
+### Interpreted Languages (Inline)
 
 Python and JavaScript execute directly via their respective binaries:
 
@@ -185,6 +201,7 @@ description = "Hello in javascript"
 run = """
 console.log("Hello World");
 """
+
 ```
 
 ### Compiled Languages (C / C++)
@@ -221,9 +238,8 @@ int main() {
     return 0;
 }
 '''
-```
 
----
+```
 
 ## Concepts
 
@@ -233,10 +249,6 @@ int main() {
 | Sigil | A task or command |
 | Cast | Execute a sigil |
 | Ingredients | Parameters and variables |
-| Familiars | Plugins and extensions |
-| Codex | Generated documentation |
-
----
 
 ## Philosophy
 
@@ -251,21 +263,16 @@ Grimoire aims to make automation:
 Underneath the magical terminology is a serious, production-grade automation
 tool.
 
----
-
 ## Roadmap
 
 * [x] Core task runner
 * [x] Dependency engine (DAG)
 * [x] Multi-language runtimes
 * [x] Interactive prompts
-* [ ] Documentation generation
+* [x] Native shebang support
 * [ ] Full TUI interface (`grim tui`)
 * [ ] Graph visualization
-* [ ] Plugin system
 * [ ] Project templates
-
----
 
 ## Inspiration
 
@@ -281,13 +288,9 @@ tool.
 * **Frieren: Beyond Journey's End**
 * **Witch Hat Atelier**
 
----
-
 ### License
 
 MIT OR Apache-2.0
-
----
 
 ## 🧠 (mostly) Brain made
 

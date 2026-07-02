@@ -22,6 +22,9 @@ pub async fn run() -> Result<()> {
             let config = config::load_grimoire()?;
             executor::cast_sigil(&config, &name, extra_args).await?;
         }
+        Commands::Lang => {
+            executor::list_languages();
+        }
     }
 
     Ok(())
