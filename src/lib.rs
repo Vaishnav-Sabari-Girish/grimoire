@@ -1,6 +1,7 @@
 pub mod cli;
 pub mod config;
 pub mod executor;
+pub mod tui;
 
 use anyhow::{Ok, Result};
 use clap::Parser;
@@ -24,6 +25,9 @@ pub async fn run() -> Result<()> {
         }
         Commands::Lang => {
             executor::list_languages();
+        }
+        Commands::Tui => {
+            tui::run_tui().await?;
         }
     }
 
