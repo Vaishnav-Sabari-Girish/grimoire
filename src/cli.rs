@@ -34,4 +34,8 @@ pub enum Commands {
     /// [alias: tongues]
     #[command(alias = "tongues")]
     Lang,
+
+    /// Open an interactive TUI to browse and cast sigils
+    #[command(visible_aliases = ["ui"])]
+    Tui,
 }
